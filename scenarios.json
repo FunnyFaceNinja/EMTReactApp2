@@ -1,0 +1,110 @@
+[
+    {
+      "scenarioId": "scenario1",
+      "title": "Car Accident Response",
+      "steps": [
+        {
+          "stepId": "step1",
+          "text": "You arrive at the scene of a car accident. A patient is unconscious. What do you do first?",
+          "options": [
+            {
+              "optionId": "option1",
+              "text": "Check the patient's airway and breathing.",
+              "points": 10,
+              "nextStepId": "step2",
+              "isAutoFail": false
+            },
+            {
+              "optionId": "option2",
+              "text": "Start CPR immediately.",
+              "points": 5,
+              "nextStepId": "step2",
+              "isAutoFail": false
+            },
+            {
+              "optionId": "option3",
+              "text": "Call for backup and wait.",
+              "points": 2,
+              "nextStepId": "step2",
+              "isAutoFail": false
+            },
+            {
+              "optionId": "option4",
+              "text": "Move the patient to a safer location.",
+              "points": 0,
+              "nextStepId": null,
+              "isAutoFail": true
+            }
+          ]
+        },
+        {
+          "stepId": "step2",
+          "text": "The patient is now breathing but unresponsive. What do you do next?",
+          "options": [
+            {
+              "optionId": "option1",
+              "text": "Check for a pulse and start CPR if needed.",
+              "points": 10,
+              "nextStepId": "step3",
+              "isAutoFail": false
+            },
+            {
+              "optionId": "option2",
+              "text": "Administer oxygen.",
+              "points": 8,
+              "nextStepId": "step3",
+              "isAutoFail": false
+            },
+            {
+              "optionId": "option3",
+              "text": "Wait for the patient to regain consciousness.",
+              "points": 3,
+              "nextStepId": "step3",
+              "isAutoFail": false
+            },
+            {
+              "optionId": "option4",
+              "text": "Leave the patient and attend to others.",
+              "points": 0,
+              "nextStepId": null,
+              "isAutoFail": true
+            }
+          ]
+        },
+        {
+          "stepId": "step3",
+          "text": "The patient regains consciousness. What do you do next?",
+          "options": [
+            {
+              "optionId": "option1",
+              "text": "Ask the patient if they are in pain.",
+              "points": 10,
+              "nextStepId": null,
+              "isAutoFail": false
+            },
+            {
+              "optionId": "option2",
+              "text": "Administer pain medication.",
+              "points": 5,
+              "nextStepId": null,
+              "isAutoFail": false
+            },
+            {
+              "optionId": "option3",
+              "text": "Wait for EMS to arrive.",
+              "points": 3,
+              "nextStepId": null,
+              "isAutoFail": false
+            },
+            {
+              "optionId": "option4",
+              "text": "Leave the patient unattended.",
+              "points": 0,
+              "nextStepId": null,
+              "isAutoFail": true
+            }
+          ]
+        }
+      ]
+    }
+  ]

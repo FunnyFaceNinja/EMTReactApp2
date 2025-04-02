@@ -1,0 +1,132 @@
+[
+  {
+    "documentId": "question_1",
+    "data": {
+      "question": "The pressure felt upon the walls of the artery when the heart contracts is known as what type of pressure?",
+      "optionA": "A. Systolic",
+      "optionB": "B. Diastolic",
+      "optionC": "C. Blood",
+      "optionD": "D. Palpated",
+      "correctAnswer": "A",
+      "selectedOption": "",
+      "isCorrect": false
+    }
+  },
+  {
+    "documentId": "question_2",
+    "data": {
+      "question": "Which of the following systems controls breathing?",
+      "optionA": "A. Respiratory",
+      "optionB": "B. Skeletal",
+      "optionC": "C. Cardiovascular",
+      "optionD": "D. Nervous",
+      "correctAnswer": "D",
+      "selectedOption": "",
+      "isCorrect": false
+    }
+  },
+  {
+    "documentId": "question_3",
+    "data": {
+      "question": "The adult human skeleton is made up of how many bones?",
+      "optionA": "A. 203",
+      "optionB": "B. 212",
+      "optionC": "C. 206",
+      "optionD": "D. 33",
+      "correctAnswer": "C",
+      "selectedOption": "",
+      "isCorrect": false
+    }
+  },
+  {
+    "documentId": "question_4",
+    "data": {
+      "question": "In the pneumonic OPQRST what does S stand for?",
+      "optionA": "A. Signs",
+      "optionB": "B. Severity",
+      "optionC": "C. Symptoms",
+      "optionD": "D. Side effects",
+      "correctAnswer": "B",
+      "selectedOption": "",
+      "isCorrect": false
+    }
+  },
+  {
+    "documentId": "question_5",
+    "data": {
+      "question": "When obtaining a blood pressure by palpation, you should be placing your fingers on which of the following arteries?",
+      "optionA": "A. Carotid",
+      "optionB": "B. Brachial",
+      "optionC": "C. Femoral",
+      "optionD": "D. Radial",
+      "correctAnswer": "D",
+      "selectedOption": "",
+      "isCorrect": false
+    }
+  },
+  {
+    "documentId": "question_6",
+    "data": {
+      "question": "When dealing with a patient who is experiencing exacerbation of COPD and does not have an O2 alert card you should start administering Oxygen at what flow rate:",
+      "optionA": "A. 2L",
+      "optionB": "B. 15L",
+      "optionC": "C. 8L",
+      "optionD": "D. 5L",
+      "correctAnswer": "A",
+      "selectedOption": "",
+      "isCorrect": false
+    }
+  },
+  {
+    "documentId": "question_7",
+    "data": {
+      "question": "The dose of Salbutamol for a 5-year-old is:",
+      "optionA": "A. 2.5mg NEB",
+      "optionB": "B. 1.5mg NEB",
+      "optionC": "C. 5mg NEB",
+      "optionD": "D. 7.5mg NEB",
+      "correctAnswer": "C",
+      "selectedOption": "",
+      "isCorrect": false
+    }
+  },
+  {
+    "documentId": "question_8",
+    "data": {
+      "question": "Which of the following is listed as a side effect of administering adrenaline as per your PHECC CPGs:",
+      "optionA": "A. Hypotension",
+      "optionB": "B. Tachycardia",
+      "optionC": "C. Tachyarrhythmia",
+      "optionD": "D. KSAR",
+      "correctAnswer": "C",
+      "selectedOption": "",
+      "isCorrect": false
+    }
+  },
+  {
+    "documentId": "question_9",
+    "data": {
+      "question": "When treating an adult patient, with a pain of 1 to 3 on the pain scale, you should administer:",
+      "optionA": "A. Aspirin 150mg PO",
+      "optionB": "B. Paracetamol 1g PO",
+      "optionC": "C. GTN 400mg",
+      "optionD": "D. Paracetamol 500mg PO",
+      "correctAnswer": "B",
+      "selectedOption": "",
+      "isCorrect": false
+    }
+  },
+  {
+    "documentId": "question_10",
+    "data": {
+      "question": "When dealing with a patient who is experiencing exacerbation of COPD, but who doesn’t have an O2 alert card, you should:",
+      "optionA": "A. Commence O2 therapy at 60%",
+      "optionB": "B. Commence O2 therapy at 100%",
+      "optionC": "C. Commence O2 therapy at 44%",
+      "optionD": "D. Commence O2 therapy at 28%",
+      "correctAnswer": "D",
+      "selectedOption": "",
+      "isCorrect": false
+    }
+  }
+]
