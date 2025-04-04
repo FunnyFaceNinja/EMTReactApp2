@@ -1,74 +1,255 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Button, TouchableOpacity, useColorScheme } from 'react-native';
+import { RadioButton, ProgressBar } from 'react-native-paper';
+import { databases } from '../../appwriteConfig';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import UsernameModal from '../../components/UsernameModal';
+import { useUser } from '../../context/UserContext';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+type RootStackParamList = {
+  MCQ: { testId: string };
+  HighScores: { testId: string };
+};
 
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+type MCQScreenRouteProp = RouteProp<RootStackParamList, 'MCQ'>;
+
+interface MCQScreenProps {
+  route?: MCQScreenRouteProp; // Make route optional
+}
+
+interface Question {
+  documentId: string;
+  data: {
+    question: string;
+    optionA: string;
+    optionB: string;
+    optionC: string;
+    optionD: string;
+    correctAnswer: string;
+    selectedOption: string;
+    isCorrect: boolean;
+  };
+}
+
+export default function MCQScreen({ route }: MCQScreenProps) {
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [selectedOption, setSelectedOption] = useState('');
+  const [testStarted, setTestStarted] = useState(false);
+  const [testEnded, setTestEnded] = useState(false);
+  const [correctAnswers, setCorrectAnswers] = useState(0);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [testId, setTestId] = useState<string | null>(null); // Track selected test ID
+  const colorScheme = useColorScheme();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const { username, isLoading } = useUser();
+
+  // Use useRoute to safely access route.params
+  const safeRoute = useRoute<MCQScreenRouteProp>();
+  const { testId: routeTestId } = safeRoute.params || { testId: null };
+
+  useEffect(() => {
+    if (routeTestId) {
+      setTestId(routeTestId);
+    }
+  }, [routeTestId]);
+
+  useEffect(() => {
+    if (testId) {
+      const fetchQuestions = async () => {
+        try {
+          const response = await databases.listDocuments(
+            '67bc7a3300045b341a68', // Replace with your database ID
+            '67bc7a60002cea5f0f06' // Replace with your collection ID
+          );
+
+          // Map the Appwrite documents to your Question type
+          const allQuestions = response.documents.map((doc) => ({
+            documentId: doc.$id, // Use the Appwrite document ID
+            data: {
+              question: doc.question,
+              optionA: doc.optionA,
+              optionB: doc.optionB,
+              optionC: doc.optionC,
+              optionD: doc.optionD,
+              correctAnswer: doc.correctAnswer,
+              selectedOption: doc.selectedOption || '', // Default to empty string if not present
+              isCorrect: doc.isCorrect || false, // Default to false if not present
+            },
+          })) as Question[];
+
+          const startIndex = testId === 'test1' ? 0 : 5;
+          const endIndex = testId === 'test1' ? 5 : 10;
+          setQuestions(allQuestions.slice(startIndex, endIndex));
+        } catch (error) {
+          console.error('Error fetching questions:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchQuestions();
+    }
+  }, [testId]);
+
+  const handleStartTest = (selectedTestId: string) => {
+    setTestId(selectedTestId);
+    setTestStarted(true);
+  };
+
+  const handleNextQuestion = () => {
+    let updatedCorrectAnswers = correctAnswers;
+    if (selectedOption === questions[currentQuestion].data.correctAnswer) {
+      updatedCorrectAnswers += 1;
+      setCorrectAnswers(updatedCorrectAnswers);
+    }
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion(currentQuestion + 1);
+      setSelectedOption('');
+    } else {
+      setTestEnded(true);
+      const score = (updatedCorrectAnswers / questions.length) * 100;
+      saveHighScore(score, testId!);
+    }
+  };
+
+  const handleOptionSelect = (option: string) => {
+    setSelectedOption(option);
+  };
+
+  const handleRestartTest = () => {
+    setCurrentQuestion(0);
+    setSelectedOption('');
+    setTestStarted(false);
+    setTestEnded(false);
+    setCorrectAnswers(0);
+    setTestId(null); // Reset test selection
+  };
+
+  const saveHighScore = async (score: number, testId: string) => {
+    try {
+      await databases.createDocument(
+        '67bc7a3300045b341a68', // Replace with your database ID
+        '67c9cd07000cbea7e5d1', // Replace with your collection ID
+        'unique()', // Unique ID for the document
+        {
+          testId: testId,
+          score: score,
+          timestamp: new Date().toISOString(),
+          username: username || 'Anonymous', // Include the username with the score
+        }
+      );
+    } catch (error) {
+      console.error('Error saving high score:', error);
+    }
+  };
+
+  const textColor = 'black';
+  const backgroundColor = '#F2F7D9';
+  const buttonColor = '#F26969';
+  const progress = (currentQuestion + 1) / questions.length;
+
+  // Show username modal if no username set (and not still loading)
+  if (!isLoading && !username) {
+    return <UsernameModal visible={true} />;
+  }
+
+  if (!testId) {
+    return (
+      <View style={[styles.container, { backgroundColor }]}>
+        <Text style={[styles.text, { color: textColor }]}>Choose a Test</Text>
+        <Button title="Test 1" onPress={() => handleStartTest('test1')} color={buttonColor} />
+        <Button title="Test 2" onPress={() => handleStartTest('test2')} color={buttonColor} />
+      </View>
+    );
+  }
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { backgroundColor }]}>
+        <Text style={[styles.text, { color: textColor }]}>Loading questions...</Text>
+      </View>
+    );
+  }
+
+  if (!testStarted) {
+    return (
+      <View style={[styles.container, { backgroundColor }]}>
+        <Text style={[styles.text, { color: textColor }]}>Do you want to start the test?</Text>
+        <Button title="Start Test" onPress={() => setTestStarted(true)} color={buttonColor} />
+      </View>
+    );
+  }
+
+  if (testEnded) {
+    const score = (correctAnswers / questions.length) * 100;
+    return (
+      <View style={[styles.container, { backgroundColor }]}>
+        <Text style={[styles.text, { color: textColor }]}>You have completed the test!</Text>
+        <Text style={[styles.text, { color: textColor }]}>Your score: {score}%</Text>
+        <Button title="Restart Test" onPress={handleRestartTest} color={buttonColor} />
+        <Button
+          title="View High Scores"
+          onPress={() => navigation.navigate('HighScores', { testId: testId })}
+          color={buttonColor}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Hello!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      </View>
+    );
+  }
+
+  return (
+    <View style={[styles.container, { backgroundColor }]}>
+      <View style={styles.progressBarContainer}>
+        <ProgressBar progress={progress} color={buttonColor} style={styles.progressBar} />
+      </View>
+      <Text style={[styles.text, { color: textColor }]}>{questions[currentQuestion].data.question}</Text>
+      {['A', 'B', 'C', 'D'].map((option, index) => (
+        <TouchableOpacity key={index} onPress={() => handleOptionSelect(option)} style={styles.optionContainer}>
+          <RadioButton
+            value={option}
+            status={selectedOption === option ? 'checked' : 'unchecked'}
+            onPress={() => handleOptionSelect(option)}
+            color={buttonColor}
+          />
+          <Text style={[styles.optionText, { color: textColor }]}>
+            {questions[currentQuestion].data[`option${option}` as keyof typeof questions[number]['data']]}
+          </Text>
+        </TouchableOpacity>
+      ))}
+      <Button title="Next Question" onPress={handleNextQuestion} disabled={!selectedOption} color={buttonColor} />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  text: {
+    fontSize: 24,
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  optionContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    marginBottom: 16,
+    width: '100%',
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  optionText: {
+    fontSize: 18,
+    marginLeft: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  progressBarContainer: {
+    width: '100%',
+    paddingHorizontal: 16,
+    marginBottom: 24,
+  },
+  progressBar: {
+    height: 10,
   },
 });

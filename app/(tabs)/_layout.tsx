@@ -27,6 +27,7 @@ export default function TabLayout() {
 
   return (
     <Tabs
+      //initialRouteName="MCQ"
       screenOptions={{
         tabBarActiveTintColor: themeColors.tint,
         tabBarInactiveTintColor: themeColors.text,
@@ -43,22 +44,9 @@ export default function TabLayout() {
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
       }}>
+      
       <Tabs.Screen
         name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="MCQ"
         options={{
           title: 'MCQ',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="questionmark" color={color} />,
@@ -82,6 +70,13 @@ export default function TabLayout() {
         name="ScenarioScreen"
         options={{
           title: 'Scenarios',
+          tabBarIcon: ({ color }) => <IconSymbol name="questionmark" color={color} size={28} />,
+        }}
+      />
+      <Tabs.Screen
+        name="CPG"
+        options={{
+          title: 'CPG',
           tabBarIcon: ({ color }) => <IconSymbol name="questionmark" color={color} size={28} />,
         }}
       />
