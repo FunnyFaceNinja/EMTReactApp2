@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, SafeAreaView } from 'react-native';
 import { databases } from '../../appwriteConfig';
 import { ID, Query } from 'appwrite';
+import { useUser } from '../../context/UserContext';
 
 // Define types for our scenario data
 interface Option {
@@ -33,6 +34,9 @@ export default function ScenarioScreen() {
   const [userScore, setUserScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [autoFailed, setAutoFailed] = useState(false);
+  
+  // Get user context to access username
+  const { username } = useUser();
   
   // Fetch all scenarios when component mounts
   useEffect(() => {
@@ -114,6 +118,35 @@ export default function ScenarioScreen() {
     }
   };
 
+  // Save the score to the database
+  const saveScore = async () => {
+    if (!selectedScenario) return;
+    
+    try {
+      await databases.createDocument(
+        '67bc7a3300045b341a68',     // Database ID
+        '680292d4003b75d41995',     // Scenario scores collection ID
+        ID.unique(),                // Generate unique ID
+        {
+          scenarioId: selectedScenario.scenarioId,
+          score: userScore,
+          timestamp: new Date().toISOString(),
+          username: username || 'Anonymous',
+        }
+      );
+      console.log('Score saved successfully');
+    } catch (error) {
+      console.error('Error saving score:', error);
+    }
+  };
+
+  // Modify the existing game over condition to save score
+  useEffect(() => {
+    if (gameOver && selectedScenario) {
+      saveScore();
+    }
+  }, [gameOver]);
+
   // Reset everything to start over
   const resetGame = () => {
     setSelectedScenario(null);
@@ -169,6 +202,7 @@ export default function ScenarioScreen() {
         ) : (
           <Text style={styles.resultText}>
             You completed the scenario with {userScore} points!
+            {username ? ' Your score has been saved.' : ' Sign in to save your score.'}
           </Text>
         )}
         
