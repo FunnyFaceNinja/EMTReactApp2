@@ -394,37 +394,37 @@ export default function MCQScreen() {
 // Styles for the components
 const styles = StyleSheet.create({
   container: {
-    flex: 1,                // Take up all available space
-    padding: 16,            // Add padding around edges
+    flex: 1,
+    padding: 16,
   },
   scrollContainer: {
     flex: 1,
     width: '100%',
   },
   header: {
-    flexDirection: 'row',   // Items in a row
-    alignItems: 'center',   // Center items vertically
-    justifyContent: 'space-between', // Space items evenly
-    marginBottom: 16,       // Space below header
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
   },
   headerTitle: {
-    fontSize: 18,           // Text size
-    fontWeight: 'bold',     // Make text bold
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   exitButton: {
-    padding: 8,             // Padding for touch target
+    padding: 8,
   },
   title: {
-    fontSize: 24,           // Large title text
-    fontWeight: 'bold',     // Bold text
-    textAlign: 'center',    // Center text
-    marginBottom: 16,       // Space below title
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 16,
   },
   info: {
-    fontSize: 16,           // Info text size
-    textAlign: 'center',    // Center text
-    marginBottom: 24,       // Space below info
-    color: '#666',          // Grey color
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 24,
+    color: '#666',
   },
   loadingContainer: {
     flex: 1,
@@ -441,120 +441,120 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   testCard: {
-    backgroundColor: 'white', // White background
-    borderRadius: 12,        // Rounded corners
-    padding: 20,            // Internal padding
-    marginBottom: 16,       // Space below card
-    width: '100%',          // Full width
-    shadowColor: '#000',    // Shadow color
-    shadowOffset: { width: 0, height: 2 }, // Shadow position
-    shadowOpacity: 0.1,     // Shadow opacity
-    shadowRadius: 3,        // Shadow blur radius
-    elevation: 3,           // Android elevation
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 16,
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
   testName: {
-    fontSize: 18,           // Test name size
-    fontWeight: 'bold',     // Bold text
-    marginBottom: 8,        // Space below name
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
     textAlign: 'center',
   },
   testInfo: {
-    fontSize: 14,           // Info text size
-    color: '#666',          // Grey color
+    fontSize: 14,
+    color: '#666',
     textAlign: 'center',
   },
   questionCard: {
-    backgroundColor: 'white', // White background
-    borderRadius: 12,        // Rounded corners
-    padding: 20,            // Internal padding
-    marginBottom: 16,       // Space below card
-    width: '100%',          // Full width
-    shadowColor: '#000',    // Shadow color
-    shadowOffset: { width: 0, height: 2 }, // Shadow position
-    shadowOpacity: 0.1,     // Shadow opacity
-    shadowRadius: 3,        // Shadow blur radius
-    elevation: 3,           // Android elevation
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 16,
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
   questionText: {
-    fontSize: 18,           // Question text size
-    marginBottom: 24,       // Space below question
-    lineHeight: 26,         // Increased line height for readability
+    fontSize: 18,
+    marginBottom: 24,
+    lineHeight: 26,
   },
   progressBarContainer: {
-    width: '100%',          // Full width
-    marginBottom: 16,       // Space below container
+    width: '100%',
+    marginBottom: 16,
   },
   progressBar: {
-    height: 8,              // Bar height
-    borderRadius: 4,        // Rounded bar ends
+    height: 8,
+    borderRadius: 4,
   },
   optionContainer: {
-    flexDirection: 'row',   // Items in a row
-    alignItems: 'center',   // Center items vertically
-    marginBottom: 12,       // Space below option
-    padding: 12,            // Internal padding
-    borderWidth: 1,         // Border width
-    borderColor: '#ddd',    // Border color
-    borderRadius: 8,        // Rounded corners
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
   },
   selectedOption: {
-    backgroundColor: '#F2F7D9', // Light green background
-    borderColor: '#F26969',   // Pink border
+    backgroundColor: '#F2F7D9',
+    borderColor: '#F26969',
   },
   optionText: {
-    fontSize: 16,           // Option text size
-    marginLeft: 8,          // Space after radio button
-    flex: 1,                // Take up remaining space
+    fontSize: 16,
+    marginLeft: 8,
+    flex: 1,
   },
   selectedOptionText: {
-    fontWeight: '500',      // Make selected text slightly bolder
+    fontWeight: '500',
   },
   buttonRow: {
-    flexDirection: 'row',   // Buttons in a row
-    justifyContent: 'space-between', // Space buttons evenly
-    marginTop: 16,          // Space above buttons
-    marginBottom: 8,        // Space below buttons
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 16,
+    marginBottom: 8,
   },
   button: {
-    backgroundColor: '#F26969', // Pink background
-    paddingVertical: 14,    // Vertical padding
-    paddingHorizontal: 24,  // Horizontal padding
-    borderRadius: 10,       // Rounded corners
-    alignItems: 'center',   // Center text horizontally
-    justifyContent: 'center', // Center text vertically
-    minWidth: 120,          // Minimum button width
-    shadowColor: '#000',    // Shadow color
-    shadowOffset: { width: 0, height: 1 }, // Shadow position
-    shadowOpacity: 0.2,     // Shadow opacity
-    shadowRadius: 1.5,      // Shadow blur radius
-    elevation: 2,           // Android elevation
+    backgroundColor: '#F26969',
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 120,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.5,
+    elevation: 2,
   },
   secondaryButton: {
-    backgroundColor: 'white', // White background
-    borderWidth: 1,         // Border width
-    borderColor: '#F26969', // Pink border
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#F26969',
   },
   disabledButton: {
-    backgroundColor: '#ccc', // Grey background when disabled
+    backgroundColor: '#ccc',
     shadowOpacity: 0,
     elevation: 0,
   },
   fullWidthButton: {
-    width: '100%',          // Full width for single button
+    width: '100%',
   },
   buttonText: {
-    color: 'white',         // White text
-    fontSize: 16,           // Text size
-    fontWeight: 'bold',     // Bold text
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   secondaryButtonText: {
-    color: '#F26969',       // Pink text for secondary button
+    color: '#F26969',
   },
   scoreText: {
-    fontSize: 42,           // Large score text
-    fontWeight: 'bold',     // Bold text
-    textAlign: 'center',    // Center text
-    marginVertical: 20,     // Vertical margin
-    color: '#F26969',       // Pink color
+    fontSize: 42,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginVertical: 20,
+    color: '#F26969',
   },
 });

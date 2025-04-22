@@ -1,41 +1,29 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Animated, SafeAreaView, ScrollView, Platform } from 'react-native';
-import Svg from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import SkeletonReactComponent from '../assets/images/SkeletonReactComponent';
 
 const { width, height } = Dimensions.get('window');
 
+// Optimized femur path for cross-platform rendering
+const OPTIMIZED_FEMUR_PATH = "M9.7849 185.622C7.64341 187.905 6.91683 190.973 8.91492 194.369C12.8633 201.078 21.3432 202.015 25.999 195.926C26.9401 194.54 28.1057 193.408 29.4221 192.602C30.7386 191.796 32.1772 191.333 33.6472 191.242C37.0411 191.16 39.2591 189.872 39.7562 185.388C40.2534 180.903 40.3776 176.769 36.3432 174.849C32.3088 172.929 31.0947 169.17 30.674 164.416C26.797 120.621 24.723 76.6155 24.4599 32.5655C24.4599 27.4719 24.8518 22.425 27.9016 18.3852C30.5497 14.8724 32.3853 11.1018 29.5746 6.49996C26.7639 1.89809 22.978 1.81613 19.1157 3.94728C16.3145 5.52807 14.1348 5.53977 12.1367 2.31963C11.6029 1.49499 10.9047 0.852738 10.1092 0.454837C9.31383 0.0569354 8.4481 -0.0831895 7.5956 0.0479597C0.826961 -0.197942 -1.62044 4.14637 1.07555 12.0269C3.42737 18.877 6.46752 25.4461 7.37574 32.8817C12.6912 76.4883 16.5536 120.247 15.9799 164.439C15.8748 172.437 15.1673 179.919 9.7849 185.622Z";
+
 const InteractiveDiagram = () => {
   const [selectedPart, setSelectedPart] = useState<string | null>(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const [svgDimensions, setSvgDimensions] = useState({ width: width, height: height * 0.8 });
 
-  // Handle when a bone is clicked
+  useEffect(() => {
+    setSvgDimensions({ width: width, height: height * 0.8 });
+  }, []);
+
   const handlePartClick = (part: string) => {
     console.log("Part clicked:", part);
     
-    // Only process if it's the femur (our only interactive bone)
     if (part.toLowerCase() === 'femur') {
       setSelectedPart(part);
       
-      // Start pulse animation on the femur
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: 1.2,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
-      
-      // Animate the info card
       Animated.sequence([
         Animated.timing(fadeAnim, {
           toValue: 0,
@@ -51,14 +39,17 @@ const InteractiveDiagram = () => {
     }
   };
 
-  // Clear selection
   const clearSelection = () => {
-    setSelectedPart(null);
-    pulseAnim.stopAnimation();
-    pulseAnim.setValue(1);
+    Animated.timing(fadeAnim, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => {
+      setSelectedPart(null);
+    });
   };
 
-  // For Android, provide an additional clickable area
+  // Helps with touch detection which can be inconsistent with SVG on Android
   const FemurClickableArea = () => {
     if (Platform.OS !== 'android') return null;
     
@@ -80,30 +71,24 @@ const InteractiveDiagram = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header with title */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Human Skeleton</Text>
         <Text style={styles.headerSubtitle}>Interactive Anatomy Guide</Text>
       </View>
 
-      {/* Main content area */}
       <View style={styles.diagramContainer}>
-        {/* SVG Skeleton */}
-        <View style={styles.svgContainer}>
-          <Svg width={width} height={height * 0.8} viewBox={`0 0 ${width} ${height * 0.8}`}>
-            <SkeletonReactComponent
-              width="100%"
-              height="100%"
-              highlightedPart={selectedPart}
-              onPartClick={handlePartClick}
-            />
-          </Svg>
+        <View style={[styles.svgContainer, { width: svgDimensions.width, height: svgDimensions.height }]}>
+          <SkeletonReactComponent
+            width={svgDimensions.width}
+            height={svgDimensions.height}
+            style={{ width: '100%', height: '100%' }}
+            highlightedPart={selectedPart}
+            onPartClick={handlePartClick}
+          />
           
-          {/* Additional clickable area for Android */}
           <FemurClickableArea />
         </View>
 
-        {/* Tip for user */}
         {!selectedPart && (
           <View style={styles.instructionContainer}>
             <Ionicons name="finger-print" size={24} color="#666" />
@@ -111,7 +96,29 @@ const InteractiveDiagram = () => {
           </View>
         )}
 
-        {/* Information card for selected bone */}
+        {selectedPart && selectedPart.toLowerCase() === 'femur' && (
+          <Animated.View 
+            style={[
+              styles.isolatedBoneContainer,
+              { opacity: fadeAnim }
+            ]}
+          >
+            <Svg 
+              width={120} 
+              height={240} 
+              viewBox="-2 -1 45 220"
+              style={{backgroundColor: 'transparent'}}
+            >
+              <Path 
+                d={OPTIMIZED_FEMUR_PATH}
+                fill="#F26969"
+                stroke="#333"
+                strokeWidth="0.5"
+              />
+            </Svg>
+          </Animated.View>
+        )}
+
         {selectedPart && selectedPart.toLowerCase() === 'femur' && (
           <Animated.View 
             style={[
@@ -194,9 +201,9 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   svgContainer: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
   },
   instructionContainer: {
     position: 'absolute',
@@ -217,6 +224,20 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 14,
     color: '#666',
+  },
+  isolatedBoneContainer: {
+    position: 'absolute',
+    bottom: 340,
+    alignSelf: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 12,
+    padding: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 5,
+    zIndex: 1000,
   },
   infoCard: {
     position: 'absolute',

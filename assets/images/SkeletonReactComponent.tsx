@@ -10,6 +10,8 @@ interface SkeletonReactComponentProps extends SvgProps {
 const SkeletonReactComponent: React.FC<SkeletonReactComponentProps> = ({ 
   highlightedPart, 
   onPartClick,
+  width,
+  height,
   ...props 
 }) => {
   // Handler function for femur click
@@ -19,9 +21,11 @@ const SkeletonReactComponent: React.FC<SkeletonReactComponentProps> = ({
   };
 
   return (
-    <View style={{ width: '100%', height: '100%' }}>
+    <View style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
       <Svg
-        data-name="katman 1"
+        width={width}
+        height={height}
+        preserveAspectRatio="xMidYMid meet"
         viewBox="0 0 260.71 909.64"
         {...props}
       >
@@ -40,9 +44,10 @@ const SkeletonReactComponent: React.FC<SkeletonReactComponentProps> = ({
           d="M447.37,713.59c-2.24,1.95-3,4.57-.91,7.47,4.13,5.73,13,6.53,17.87,1.33a11.13,11.13,0,0,1,8-4c3.55-.07,5.87-1.17,6.39-5s.65-7.36-3.57-9-5.49-4.85-5.93-8.91a1120.6,1120.6,0,0,1-6.5-112.6c0-4.35.41-8.66,3.6-12.11,2.77-3,4.69-6.22,1.75-10.15s-6.9-4-10.94-2.18c-2.93,1.35-5.21,1.36-7.3-1.39a5.23,5.23,0,0,0-4.75-1.94c-7.08-.21-9.64,3.5-6.82,10.23,2.46,5.85,5.64,11.46,6.59,17.81,5.56,37.24,9.6,74.61,9,112.35C453.74,702.33,453,708.72,447.37,713.59Z"
           transform="translate(-369.8 -45.49)"
           fill={highlightedPart === 'femur' ? 'red' : 'black'}
+          onPress={handleFemurClick}
         />
         
-        {/* Invisible touchable rectangle over femur (more reliable in SVG) */}
+        {/* Ensures code works on all platforms */}
         <Rect
           x="75" 
           y="550"
@@ -53,7 +58,7 @@ const SkeletonReactComponent: React.FC<SkeletonReactComponentProps> = ({
         />
       </Svg>
       
-      {/* Larger TouchableOpacity overlay for Android */}
+      {/* Fix for interactiivity issues on android */}
       {Platform.OS === 'android' && (
         <TouchableOpacity
           onPress={handleFemurClick}
