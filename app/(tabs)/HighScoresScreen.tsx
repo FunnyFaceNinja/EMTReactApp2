@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, Dimensions } from 'react-native';
 import { databases } from '../../appwriteConfig';
 import { Query } from 'appwrite';
 import { useUser } from '../../context/UserContext';
 import { Ionicons } from '@expo/vector-icons';
+import { LineChart, BarChart } from 'react-native-chart-kit';
 
 // Type definitions
 interface HighScore {
@@ -20,6 +21,11 @@ interface ScenarioScore {
   username: string;
 }
 
+interface UserProgress {
+  date: string;
+  score: number;
+}
+
 // App theme colors (moved outside component)
 const COLORS = {
   text: 'black',
@@ -27,8 +33,19 @@ const COLORS = {
   button: '#F26969',
   card: 'white',
   border: '#ddd',
-  secondaryText: '#666'
+  secondaryText: '#666',
+  chart: {
+    backgroundGradientFrom: '#F2F7D9',
+    backgroundGradientTo: '#F2F7D9',
+    color: (opacity = 1) => `rgba(242, 105, 105, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+    strokeWidth: 2,
+    barPercentage: 0.5,
+    useShadowColorFromDataset: false
+  }
 };
+
+const screenWidth = Dimensions.get('window').width - 32; // accounting for padding
 
 const HighScoresScreen = () => {
   // State management - keeping arrays separate
@@ -37,7 +54,10 @@ const HighScoresScreen = () => {
   const [selectedTestId, setSelectedTestId] = useState('test1'); 
   const [selectedScenarioId, setSelectedScenarioId] = useState('');
   const [scoreType, setScoreType] = useState<'test' | 'scenario'>('test');
+  const [viewType, setViewType] = useState<'list' | 'chart'>('list');
   const [loading, setLoading] = useState(true);
+  const [userProgress, setUserProgress] = useState<UserProgress[]>([]);
+  const [allUserScores, setAllUserScores] = useState<{[username: string]: number}>({});
   const { username, logout } = useUser();
 
   // Fetch MCQ test scores
@@ -62,6 +82,34 @@ const HighScoresScreen = () => {
         })) as HighScore[];
 
         setHighScores(scores);
+        
+        // Extract user's progress data for charts
+        const userScores = scores
+          .filter(score => score.username === username)
+          .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+          .map(score => ({
+            date: new Date(score.timestamp).toLocaleDateString('en-IE', { month: 'short', day: 'numeric' }),
+            score: score.score
+          }));
+        
+        setUserProgress(userScores);
+        
+        // Prepare data for comparison chart
+        const userAverages: {[username: string]: {total: number, count: number}} = {};
+        scores.forEach(score => {
+          if (!userAverages[score.username]) {
+            userAverages[score.username] = { total: 0, count: 0 };
+          }
+          userAverages[score.username].total += score.score;
+          userAverages[score.username].count += 1;
+        });
+        
+        const userAverageScores: {[username: string]: number} = {};
+        Object.keys(userAverages).forEach(user => {
+          userAverageScores[user] = userAverages[user].total / userAverages[user].count;
+        });
+        
+        setAllUserScores(userAverageScores);
       } catch (error) {
         console.error('Error fetching high scores:', error);
       } finally {
@@ -72,7 +120,7 @@ const HighScoresScreen = () => {
     if (scoreType === 'test') {
       fetchHighScores();
     }
-  }, [selectedTestId, scoreType]);
+  }, [selectedTestId, scoreType, username]);
 
   // Fetch all available scenario IDs on mount
   useEffect(() => {
@@ -122,6 +170,34 @@ const HighScoresScreen = () => {
         })) as ScenarioScore[];
 
         setScenarioScores(scores);
+        
+        // Extract user's progress data for charts
+        const userScores = scores
+          .filter(score => score.username === username)
+          .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+          .map(score => ({
+            date: new Date(score.timestamp).toLocaleDateString('en-IE', { month: 'short', day: 'numeric' }),
+            score: score.score
+          }));
+        
+        setUserProgress(userScores);
+        
+        // Prepare data for comparison chart
+        const userAverages: {[username: string]: {total: number, count: number}} = {};
+        scores.forEach(score => {
+          if (!userAverages[score.username]) {
+            userAverages[score.username] = { total: 0, count: 0 };
+          }
+          userAverages[score.username].total += score.score;
+          userAverages[score.username].count += 1;
+        });
+        
+        const userAverageScores: {[username: string]: number} = {};
+        Object.keys(userAverages).forEach(user => {
+          userAverageScores[user] = userAverages[user].total / userAverages[user].count;
+        });
+        
+        setAllUserScores(userAverageScores);
       } catch (error) {
         console.error('Error fetching scenario scores:', error);
       } finally {
@@ -132,7 +208,7 @@ const HighScoresScreen = () => {
     if (scoreType === 'scenario' && selectedScenarioId) {
       fetchScenarioScores();
     }
-  }, [selectedScenarioId, scoreType]);
+  }, [selectedScenarioId, scoreType, username]);
 
   // Helper functions
   const getAvailableScenarioIds = () => {
@@ -176,6 +252,107 @@ const HighScoresScreen = () => {
       </View>
     </View>
   );
+
+  // Render user progress chart
+  const renderProgressChart = () => {
+    if (userProgress.length < 2) {
+      return (
+        <View style={styles.emptyChartContainer}>
+          <Ionicons name="analytics" size={50} color="#ccc" />
+          <Text style={styles.emptyChartText}>
+            Not enough data to show progress.
+            Complete more tests to see your progress chart.
+          </Text>
+        </View>
+      );
+    }
+
+    const chartData = {
+      labels: userProgress.map(item => item.date),
+      datasets: [
+        {
+          data: userProgress.map(item => item.score),
+          color: (opacity = 1) => `rgba(242, 105, 105, ${opacity})`,
+          strokeWidth: 2
+        }
+      ],
+      legend: ["Your Progress"]
+    };
+
+    return (
+      <View style={styles.chartContainer}>
+        <Text style={styles.chartTitle}>Your Progress Over Time</Text>
+        <LineChart
+          data={chartData}
+          width={screenWidth}
+          height={220}
+          chartConfig={COLORS.chart}
+          bezier
+          style={styles.chart}
+        />
+      </View>
+    );
+  };
+
+  // Render comparison chart
+  const renderComparisonChart = () => {
+    const usernames = Object.keys(allUserScores);
+    
+    if (usernames.length < 2) {
+      return (
+        <View style={styles.emptyChartContainer}>
+          <Ionicons name="people" size={50} color="#ccc" />
+          <Text style={styles.emptyChartText}>
+            Not enough users to compare scores.
+          </Text>
+        </View>
+      );
+    }
+
+    // Sort usernames to put current user first
+    usernames.sort((a, b) => {
+      if (a === username) return -1;
+      if (b === username) return 1;
+      return 0;
+    });
+
+    // Limit to top 5 users including current user if present
+    const displayUsers = usernames.slice(0, 5);
+    
+    const chartData = {
+      labels: displayUsers.map(name => name === username ? "You" : name.substring(0, 6) + "..."),
+      datasets: [
+        {
+          data: displayUsers.map(name => allUserScores[name]),
+          colors: displayUsers.map(name => 
+            name === username 
+              ? () => `rgba(67, 160, 71, 1)` 
+              : () => `rgba(242, 105, 105, 0.8)`
+          )
+        }
+      ]
+    };
+
+    return (
+      <View style={styles.chartContainer}>
+        <Text style={styles.chartTitle}>Score Comparison</Text>
+        <BarChart
+          data={chartData}
+          width={screenWidth}
+          height={220}
+          chartConfig={{
+            ...COLORS.chart,
+            formatYLabel: (value) => Math.round(Number(value)).toString()
+          }}
+          style={styles.chart}
+          fromZero
+          showValuesOnTopOfBars
+          yAxisLabel=""
+          yAxisSuffix={scoreType === 'test' ? "%" : "pts"}
+        />
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: COLORS.background }]}>
@@ -223,6 +400,37 @@ const HighScoresScreen = () => {
           />
           <Text style={[styles.toggleText, scoreType === 'scenario' && styles.activeToggleText]}>
             Scenarios
+          </Text>
+        </TouchableOpacity>
+      </View>
+      
+      {/* View mode toggle */}
+      <View style={styles.toggleContainer}>
+        <TouchableOpacity 
+          style={[styles.toggleButton, viewType === 'list' && styles.activeToggle]}
+          onPress={() => setViewType('list')}
+        >
+          <Ionicons 
+            name="list-outline" 
+            size={20} 
+            color={viewType === 'list' ? 'white' : COLORS.button} 
+          />
+          <Text style={[styles.toggleText, viewType === 'list' && styles.activeToggleText]}>
+            List View
+          </Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={[styles.toggleButton, viewType === 'chart' && styles.activeToggle]}
+          onPress={() => setViewType('chart')}
+        >
+          <Ionicons 
+            name="analytics-outline" 
+            size={20} 
+            color={viewType === 'chart' ? 'white' : COLORS.button} 
+          />
+          <Text style={[styles.toggleText, viewType === 'chart' && styles.activeToggleText]}>
+            Charts
           </Text>
         </TouchableOpacity>
       </View>
@@ -298,35 +506,46 @@ const HighScoresScreen = () => {
           <Text style={styles.loadingText}>Loading scores...</Text>
         </View>
       ) : (
-        <ScrollView style={styles.scrollContainer}>
-          {/* Show test scores */}
-          {scoreType === 'test' && highScores.length > 0 ? (
-            highScores.map((score, index) => (
-              <React.Fragment key={index}>
-                {renderScoreCard(score, true)}
-              </React.Fragment>
-            ))
-          ) : scoreType === 'test' ? (
-            <View style={styles.emptyStateContainer}>
-              <Ionicons name="document-text" size={60} color="#ccc" />
-              <Text style={styles.emptyStateText}>No scores for this test yet.</Text>
-            </View>
-          ) : null}
-          
-          {/* Show scenario scores */}
-          {scoreType === 'scenario' && scenarioScores.length > 0 ? (
-            scenarioScores.map((score, index) => (
-              <React.Fragment key={index}>
-                {renderScoreCard(score, false)}
-              </React.Fragment>
-            ))
-          ) : scoreType === 'scenario' ? (
-            <View style={styles.emptyStateContainer}>
-              <Ionicons name="medkit" size={60} color="#ccc" />
-              <Text style={styles.emptyStateText}>No scores for this scenario yet.</Text>
-            </View>
-          ) : null}
-        </ScrollView>
+        <>
+          {/* Chart View */}
+          {viewType === 'chart' ? (
+            <ScrollView style={styles.scrollContainer}>
+              {renderProgressChart()}
+              {renderComparisonChart()}
+            </ScrollView>
+          ) : (
+            /* List View */
+            <ScrollView style={styles.scrollContainer}>
+              {/* Show test scores */}
+              {scoreType === 'test' && highScores.length > 0 ? (
+                highScores.map((score, index) => (
+                  <React.Fragment key={index}>
+                    {renderScoreCard(score, true)}
+                  </React.Fragment>
+                ))
+              ) : scoreType === 'test' ? (
+                <View style={styles.emptyStateContainer}>
+                  <Ionicons name="document-text" size={60} color="#ccc" />
+                  <Text style={styles.emptyStateText}>No scores for this test yet.</Text>
+                </View>
+              ) : null}
+              
+              {/* Show scenario scores */}
+              {scoreType === 'scenario' && scenarioScores.length > 0 ? (
+                scenarioScores.map((score, index) => (
+                  <React.Fragment key={index}>
+                    {renderScoreCard(score, false)}
+                  </React.Fragment>
+                ))
+              ) : scoreType === 'scenario' ? (
+                <View style={styles.emptyStateContainer}>
+                  <Ionicons name="medkit" size={60} color="#ccc" />
+                  <Text style={styles.emptyStateText}>No scores for this scenario yet.</Text>
+                </View>
+              ) : null}
+            </ScrollView>
+          )}
+        </>
       )}
     </SafeAreaView>
   );
@@ -533,6 +752,44 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.secondaryText,
     marginTop: 16,
+  },
+  chartContainer: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  chartTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#333',
+  },
+  chart: {
+    borderRadius: 10,
+    padding: 10,
+  },
+  emptyChartContainer: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 30,
+    marginBottom: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 220,
+  },
+  emptyChartText: {
+    fontSize: 16,
+    color: COLORS.secondaryText,
+    textAlign: 'center',
+    marginTop: 15,
+    maxWidth: '80%',
   },
 });
 

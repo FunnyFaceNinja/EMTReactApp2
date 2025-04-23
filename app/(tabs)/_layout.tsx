@@ -3,7 +3,7 @@ import React from 'react';
 import { Platform } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+import { Ionicons } from '@expo/vector-icons'; // Change to Ionicons
 import TabBarBackground from '@/components/ui/TabBarBackground';
 
 const Colors = {
@@ -27,7 +27,6 @@ export default function TabLayout() {
 
   return (
     <Tabs
-      //initialRouteName="MCQ"
       screenOptions={{
         tabBarActiveTintColor: themeColors.tint,
         tabBarInactiveTintColor: themeColors.text,
@@ -49,35 +48,35 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'MCQ',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="questionmark" color={color} />,
+          tabBarIcon: ({ color }) => <Ionicons size={28} name="document-text" color={color} />,
         }}
       />
       <Tabs.Screen
         name="Diagram"
         options={{
           title: 'Diagram',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="questionmark" color={color} />,
+          tabBarIcon: ({ color }) => <Ionicons size={28} name="body" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="HighScores"
+        name="HighScoresScreen"
         options={{
           title: 'High Scores',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="chart.bar.fill" color={color} />,
+          tabBarIcon: ({ color }) => <Ionicons size={28} name="stats-chart" color={color} />,
         }}
       />
       <Tabs.Screen
         name="ScenarioScreen"
         options={{
           title: 'Scenarios',
-          tabBarIcon: ({ color }) => <IconSymbol name="questionmark" color={color} size={28} />,
+          tabBarIcon: ({ color }) => <Ionicons name="medkit" color={color} size={28} />,
         }}
       />
       <Tabs.Screen
         name="CPG"
         options={{
           title: 'CPG',
-          tabBarIcon: ({ color }) => <IconSymbol name="questionmark" color={color} size={28} />,
+          tabBarIcon: ({ color }) => <Ionicons name="clipboard" color={color} size={28} />,
         }}
       />
     </Tabs>

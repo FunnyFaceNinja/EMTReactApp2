@@ -290,7 +290,10 @@ export default function MCQScreen() {
           
           <TouchableOpacity 
             style={styles.button} 
-            onPress={() => navigation.navigate('HighScores', { testId })}
+            onPress={() => router.push({
+              pathname: "/(tabs)/HighScoresScreen",
+              params: { testId }
+            })}
           >
             <Text style={styles.buttonText}>View High Scores</Text>
           </TouchableOpacity>
