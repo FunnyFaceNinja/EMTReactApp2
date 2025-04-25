@@ -32,9 +32,9 @@ const insertScenarios = async () => {
         scenario.scenarioId,
         scenarioToInsert
       );
-      console.log(`✅ Scenario ${scenario.scenarioId} added successfully`);
+      console.log(`Scenario ${scenario.scenarioId} added successfully`);
     } catch (error) {
-      console.error(`❌ Failed to add scenario ${scenario.scenarioId}:`);
+      console.error(`Failed to add scenario ${scenario.scenarioId}:`);
       console.error(error);
       
       // Additional error details
@@ -46,7 +46,6 @@ const insertScenarios = async () => {
   }
 };
 
-// Run the function and handle any errors
 insertScenarios()
   .then(() => console.log('Script completed'))
   .catch(err => console.error('Script failed:', err));

@@ -4,7 +4,6 @@ import { databases } from '../../appwriteConfig';
 import { ID, Query } from 'appwrite';
 import { useUser } from '../../context/UserContext';
 
-// Define types for our scenario data
 interface Option {
   optionId: string;
   text: string;
@@ -140,7 +139,7 @@ export default function ScenarioScreen() {
     }
   };
 
-  // Modify the existing game over condition to save score
+  // save score when game is over
   useEffect(() => {
     if (gameOver && selectedScenario) {
       saveScore();
@@ -256,7 +255,7 @@ export default function ScenarioScreen() {
     );
   }
   
-  // Fallback (should never reach here)
+  //fallback just in case
   return null;
 }
 

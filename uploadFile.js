@@ -1,8 +1,7 @@
-// filepath: /c:/Users/lcall/OneDrive/Desktop/EMTReactApp/uploadFile.js
 import { storage } from './appwriteConfig';
 
 const uploadFile = async (file) => {
-  if (!file) return;
+  if (!file) return
 
   try {
     const response = await storage.createFile('67bc767d001e3dc0f566', 'unique()', file);

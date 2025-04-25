@@ -1,4 +1,3 @@
-// Import necessary libraries and components
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Alert, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
 import { RadioButton, ProgressBar } from 'react-native-paper';
@@ -11,7 +10,7 @@ import { useUser } from '../../context/UserContext';
 import { router } from 'expo-router';
 import { Platform } from 'react-native';
 
-// Define the structure of a question
+
 interface Question {
   documentId: string;
   data: {
@@ -24,13 +23,12 @@ interface Question {
   };
 }
 
-// Define navigation param types
+
 type RootStackParamList = {
   HighScores: { testId: string };
 };
 
 export default function MCQScreen() {
-  // State variables for managing the quiz flow
   const [currentQuestion, setCurrentQuestion] = useState(0);         // Current question index
   const [selectedOption, setSelectedOption] = useState('');          // User's selected answer
   const [testStarted, setTestStarted] = useState(false);             // Whether test has started
@@ -41,11 +39,11 @@ export default function MCQScreen() {
   const [testId, setTestId] = useState<string | null>(null);         // Current test ID
   const [userAnswers, setUserAnswers] = useState<string[]>([]);      // User's answers for each question
   
-  // Get navigation and user context with proper type
+
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { username, isLoading } = useUser();
   
-  // App theme colors
+
   const COLORS = {
     text: 'black',
     background: '#F2F7D9',
@@ -56,7 +54,7 @@ export default function MCQScreen() {
 
   // Fetch questions when test ID changes
   useEffect(() => {
-    if (!testId) return; // Skip if no test is selected
+    if (!testId) return;
     
     const fetchQuestions = async () => {
       try {
@@ -66,7 +64,7 @@ export default function MCQScreen() {
           '67bc7a60002cea5f0f06'    // Collection ID
         );
 
-        // Transform the response into our Question format
+
         const allQuestions = response.documents.map(doc => ({
           documentId: doc.$id,
           data: {
@@ -111,7 +109,6 @@ export default function MCQScreen() {
     setTestStarted(true);
   };
 
-  // Handle when user selects an answer option
   const handleSelectOption = (option: string) => {
     setSelectedOption(option);
     
@@ -132,7 +129,6 @@ export default function MCQScreen() {
   // Go to next question or finish test
   const handleNextQuestion = () => {
     if (currentQuestion < questions.length - 1) {
-      // Move to next question
       setCurrentQuestion(prev => prev + 1);
       setSelectedOption(userAnswers[currentQuestion + 1]);
     } else {
@@ -187,7 +183,7 @@ export default function MCQScreen() {
     console.log("resetTest completed - state should be reset");
   };
 
-  // Show username input if needed
+  // Show username input if user not logged in
   if (!isLoading && !username) {
     return <UsernameModal visible={true} />;
   }
@@ -239,7 +235,6 @@ export default function MCQScreen() {
   if (!testStarted) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: COLORS.background }]}>
-        {/* Header with exit button */}
         <View style={styles.header}>
           <TouchableOpacity onPress={resetTest} style={styles.exitButton}>
             <Ionicons name="arrow-back" size={24} color="#000" />
@@ -250,13 +245,12 @@ export default function MCQScreen() {
           <View style={{width: 24}} />
         </View>
         
-        {/* Test info */}
+
         <Text style={styles.title}>Ready to start?</Text>
         <Text style={styles.info}>
           This test has 5 questions. You can navigate between questions anytime.
         </Text>
         
-        {/* Start button */}
         <TouchableOpacity 
           style={styles.button} 
           onPress={() => setTestStarted(true)}
@@ -279,7 +273,6 @@ export default function MCQScreen() {
           You answered {correctAnswers} out of {questions.length} questions correctly.
         </Text>
         
-        {/* Action buttons */}
         <View style={styles.buttonRow}>
           <TouchableOpacity 
             style={[styles.button, styles.secondaryButton]} 
@@ -302,10 +295,9 @@ export default function MCQScreen() {
     );
   }
 
-  // Question screen - when test is active
+  // Question screen
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: COLORS.background }]}>
-      {/* Header with question counter and exit button */}
       <View style={styles.header}>
         <TouchableOpacity onPress={resetTest} style={styles.exitButton}>
           <Ionicons name="close" size={24} color="#000" />
@@ -316,7 +308,6 @@ export default function MCQScreen() {
         <View style={{width: 24}} />
       </View>
       
-      {/* Progress bar */}
       <View style={styles.progressBarContainer}>
         <ProgressBar 
           progress={(currentQuestion + 1) / questions.length} 
@@ -326,9 +317,7 @@ export default function MCQScreen() {
       </View>
       
       <ScrollView style={styles.scrollContainer}>
-        {/* Question card */}
         <View style={styles.questionCard}>
-          {/* Question text */}
           <Text style={styles.questionText}>
             {questions[currentQuestion].data.question}
           </Text>
@@ -363,9 +352,7 @@ export default function MCQScreen() {
         </View>
       </ScrollView>
       
-      {/* Navigation buttons */}
       <View style={styles.buttonRow}>
-        {/* Previous button - only show if not on first question */}
         {currentQuestion > 0 && (
           <TouchableOpacity 
             style={[styles.button, styles.secondaryButton]} 
@@ -375,7 +362,6 @@ export default function MCQScreen() {
           </TouchableOpacity>
         )}
         
-        {/* Next/Finish button */}
         <TouchableOpacity 
           style={[
             styles.button, 
@@ -394,7 +380,6 @@ export default function MCQScreen() {
   );
 }
 
-// Styles for the components
 const styles = StyleSheet.create({
   container: {
     flex: 1,

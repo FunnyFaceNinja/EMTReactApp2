@@ -1,7 +1,6 @@
 import React, { createContext, useState, useContext } from 'react';
 import { appwriteService, CPG_SECTIONS } from '@/services/appwrite';
 
-// Context interface that defines all CPG-related operations and state
 interface CPGContextType {
   selectedSection: string | null;
   selectedCPG: string | null;

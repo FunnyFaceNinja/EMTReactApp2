@@ -4,14 +4,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 interface UserContextType {
   username: string | null;
   setUsername: (username: string) => Promise<void>;
-  logout: () => Promise<void>;  // Add logout function
+  logout: () => Promise<void>;
   isLoading: boolean;
 }
 
 const UserContext = createContext<UserContextType>({
   username: null,
   setUsername: async () => {},
-  logout: async () => {},  // Add default logout function
+  logout: async () => {},
   isLoading: true
 });
 
@@ -48,7 +48,7 @@ export const UserProvider: React.FC<{children: React.ReactNode}> = ({ children }
     }
   };
 
-  // Add logout function to clear username
+  //logout function to clear username
   const logout = async () => {
     try {
       await AsyncStorage.removeItem('username');

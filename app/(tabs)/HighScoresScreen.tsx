@@ -26,7 +26,7 @@ interface UserProgress {
   score: number;
 }
 
-// App theme colors (moved outside component)
+// App theme colors
 const COLORS = {
   text: 'black',
   background: '#F2F7D9',
@@ -45,10 +45,9 @@ const COLORS = {
   }
 };
 
-const screenWidth = Dimensions.get('window').width - 32; // accounting for padding
+const screenWidth = Dimensions.get('window').width - 32;
 
 const HighScoresScreen = () => {
-  // State management - keeping arrays separate
   const [highScores, setHighScores] = useState<HighScore[]>([]);
   const [scenarioScores, setScenarioScores] = useState<ScenarioScore[]>([]);
   const [selectedTestId, setSelectedTestId] = useState('test1'); 
@@ -122,7 +121,7 @@ const HighScoresScreen = () => {
     }
   }, [selectedTestId, scoreType, username]);
 
-  // Fetch all available scenario IDs on mount
+  // Fetch all available scenario IDs
   useEffect(() => {
     const fetchScenarioIds = async () => {
       try {
@@ -210,7 +209,6 @@ const HighScoresScreen = () => {
     }
   }, [selectedScenarioId, scoreType, username]);
 
-  // Helper functions
   const getAvailableScenarioIds = () => {
     const uniqueIds = [...new Set(scenarioScores.map(score => score.scenarioId))];
     return uniqueIds.length > 0 ? uniqueIds : [selectedScenarioId].filter(Boolean);
@@ -224,7 +222,7 @@ const HighScoresScreen = () => {
     return `Scenario ${id}`;
   };
 
-  // Render common score card component
+  // Render score card component
   const renderScoreCard = (
     score: { username: string; score: number; timestamp: string }, 
     isTest: boolean
@@ -356,7 +354,6 @@ const HighScoresScreen = () => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: COLORS.background }]}>
-      {/* Header with title and logout option */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>High Scores</Text>
         <TouchableOpacity onPress={logout} style={styles.logoutButton}>
@@ -490,7 +487,6 @@ const HighScoresScreen = () => {
         </View>
       )}
       
-      {/* Current scores section title */}
       <View style={styles.scoresHeaderContainer}>
         <Text style={styles.scoresHeaderText}>
           {scoreType === 'test' ? 
