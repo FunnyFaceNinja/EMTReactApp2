@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, Dimensions } from 'react-native';
 import { databases } from '../../appwriteConfig';
 import { Query } from 'appwrite';
 import { useUser } from '../../context/UserContext';
 import { Ionicons } from '@expo/vector-icons';
 import { LineChart, BarChart } from 'react-native-chart-kit';
+import { useFocusEffect } from '@react-navigation/native';
 
 // Type definitions
 interface HighScore {
@@ -209,6 +210,132 @@ const HighScoresScreen = () => {
     }
   }, [selectedScenarioId, scoreType, username]);
 
+  //Fix for when scores don't update upon navigation
+  useFocusEffect(
+    useCallback(() => {
+      //fetch test scores
+      if (scoreType === 'test') {
+        const fetchData = async () => {
+          setLoading(true);
+          try {
+            const response = await databases.listDocuments(
+              '67bc7a3300045b341a68',
+              '67c9cd07000cbea7e5d1',
+              [
+                Query.equal('testId', [selectedTestId]),
+                Query.orderDesc('score')
+              ]
+            );
+            
+            const scores = response.documents.map((doc) => ({
+              testId: doc.testId,
+              score: doc.score,
+              timestamp: doc.timestamp,
+              username: doc.username || 'Anonymous',
+            })) as HighScore[];
+    
+            setHighScores(scores);
+            
+            // Extract user's progress data for charts
+            const userScores = scores
+              .filter(score => score.username === username)
+              .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+              .map(score => ({
+                date: new Date(score.timestamp).toLocaleDateString('en-IE', { month: 'short', day: 'numeric' }),
+                score: score.score
+              }));
+            
+            setUserProgress(userScores);
+            
+            // Prepare data for comparison chart
+            const userAverages: {[username: string]: {total: number, count: number}} = {};
+            scores.forEach(score => {
+              if (!userAverages[score.username]) {
+                userAverages[score.username] = { total: 0, count: 0 };
+              }
+              userAverages[score.username].total += score.score;
+              userAverages[score.username].count += 1;
+            });
+            
+            const userAverageScores: {[username: string]: number} = {};
+            Object.keys(userAverages).forEach(user => {
+              userAverageScores[user] = userAverages[user].total / userAverages[user].count;
+            });
+            
+            setAllUserScores(userAverageScores);
+          } catch (error) {
+            console.error('Error fetching high scores:', error);
+          } finally {
+            setLoading(false);
+          }
+        };
+        
+        fetchData();
+      } 
+      //fetch scenario scores
+      else if (scoreType === 'scenario' && selectedScenarioId) {
+        const fetchData = async () => {
+          if (!selectedScenarioId) return;
+      
+          setLoading(true);
+          try {
+            const response = await databases.listDocuments(
+              '67bc7a3300045b341a68',
+              '680292d4003b75d41995',
+              [
+                Query.equal('scenarioId', [selectedScenarioId]),
+                Query.orderDesc('score')
+              ]
+            );
+    
+            const scores = response.documents.map((doc) => ({
+              scenarioId: doc.scenarioId,
+              score: doc.score,
+              timestamp: doc.timestamp,
+              username: doc.username || 'Anonymous',
+            })) as ScenarioScore[];
+    
+            setScenarioScores(scores);
+            
+            // Extract user's progress data for charts
+            const userScores = scores
+              .filter(score => score.username === username)
+              .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+              .map(score => ({
+                date: new Date(score.timestamp).toLocaleDateString('en-IE', { month: 'short', day: 'numeric' }),
+                score: score.score
+              }));
+            
+            setUserProgress(userScores);
+            
+            // Prepare data for comparison chart
+            const userAverages: {[username: string]: {total: number, count: number}} = {};
+            scores.forEach(score => {
+              if (!userAverages[score.username]) {
+                userAverages[score.username] = { total: 0, count: 0 };
+              }
+              userAverages[score.username].total += score.score;
+              userAverages[score.username].count += 1;
+            });
+            
+            const userAverageScores: {[username: string]: number} = {};
+            Object.keys(userAverages).forEach(user => {
+              userAverageScores[user] = userAverages[user].total / userAverages[user].count;
+            });
+            
+            setAllUserScores(userAverageScores);
+          } catch (error) {
+            console.error('Error fetching scenario scores:', error);
+          } finally {
+            setLoading(false);
+          }
+        };
+        
+        fetchData();
+      }
+    }, [scoreType, selectedTestId, selectedScenarioId, username])
+  );
+
   const getAvailableScenarioIds = () => {
     const uniqueIds = [...new Set(scenarioScores.map(score => score.scenarioId))];
     return uniqueIds.length > 0 ? uniqueIds : [selectedScenarioId].filter(Boolean);
@@ -265,8 +392,23 @@ const HighScoresScreen = () => {
       );
     }
 
+    // Limit visible labels when there are too many data points
+    const labels = userProgress.map(item => item.date);
+    let displayLabels = labels;
+    
+    if (labels.length > 6) {
+      // For too many data points, only show first, last and some middle points
+      displayLabels = labels.map((label, index) => {
+        // Show first, last, and every nth label for evenly spaced points
+        if (index === 0 || index === labels.length - 1 || index % Math.ceil(labels.length / 5) === 0) {
+          return label;
+        }
+        return ""; // Empty string maintains spacing but doesn't display text
+      });
+    }
+
     const chartData = {
-      labels: userProgress.map(item => item.date),
+      labels: displayLabels,
       datasets: [
         {
           data: userProgress.map(item => item.score),
@@ -284,9 +426,17 @@ const HighScoresScreen = () => {
           data={chartData}
           width={screenWidth}
           height={220}
-          chartConfig={COLORS.chart}
+          chartConfig={{
+            ...COLORS.chart,
+            // Format y-axis labels as whole numbers
+            formatYLabel: (value) => Math.round(Number(value)).toString()
+          }}
           bezier
           style={styles.chart}
+          withDots={userProgress.length < 10} // Only show dots for fewer data points
+          withInnerLines={false}
+          withVerticalLabels={true}
+          withHorizontalLabels={true}
         />
       </View>
     );
@@ -314,6 +464,12 @@ const HighScoresScreen = () => {
       return 0;
     });
 
+    // Round all user score values to whole numbers before creating chart
+    const roundedUserScores: {[username: string]: number} = {};
+    Object.keys(allUserScores).forEach(user => {
+      roundedUserScores[user] = Math.round(allUserScores[user]);
+    });
+    
     // Limit to top 5 users including current user if present
     const displayUsers = usernames.slice(0, 5);
     
@@ -321,7 +477,7 @@ const HighScoresScreen = () => {
       labels: displayUsers.map(name => name === username ? "You" : name.substring(0, 6) + "..."),
       datasets: [
         {
-          data: displayUsers.map(name => allUserScores[name]),
+          data: displayUsers.map(name => roundedUserScores[name]),
           colors: displayUsers.map(name => 
             name === username 
               ? () => `rgba(67, 160, 71, 1)` 
